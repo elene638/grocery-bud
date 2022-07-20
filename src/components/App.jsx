@@ -85,7 +85,7 @@ export default function App() {
                 <input 
                     onChange={handleChange}  
                     type='text' 
-                    placeholder='e.g. eggs'
+                    placeholder='  e.g. eggs'
                     value={item}
                 />
                 <button 
@@ -96,22 +96,21 @@ export default function App() {
         </div>
         <div>
         {list.length > 0 && 
-        <div>
-            {list.map((itm, index) => {
-                return (
-                    <GroceryList 
-                        key={index}
-                        id={index}
-                        handleEdit={handleEdit}
-                        deleteItem={handleDelete}
-                        item={itm} 
-                    />
-                )
-            })}
-            <button className='delete-all' onClick={deleteList}>Clear Items</button>
-        </div>
+            <div>
+                {list.map((itm, index) => {
+                    return (
+                        <GroceryList 
+                            key={index}
+                            id={index}
+                            handleEdit={handleEdit}
+                            deleteItem={handleDelete}
+                            item={itm} 
+                        />
+                    )
+                })}
+                <button className='delete-all' onClick={deleteList}>Clear Items</button>
+            </div>
         }
-
         </div>
     </div>
   )
