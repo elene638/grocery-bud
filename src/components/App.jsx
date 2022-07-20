@@ -1,51 +1,65 @@
 import React from 'react'
 import GroceryList from './GroceryList'
-import { v4 as uuid } from 'uuid';
+import Alert from './Alert'
 
-// const getLocalStorage = () => {
-//     let list = localStorage.getItem('list')
-//     if(list) {
-//         return (list= JSON.parse(localStorage.getItem('list')))
-//     } else {
-//         return []
-//     }
-// }
 
 export default function App() {
 
-    const [item, setItem] = React.useState({
-        title: '',
-        id: uuid()
+    const [item, setItem] = React.useState('')
+    const [list, setList] = React.useState(JSON.parse(localStorage.getItem('list')) || [])
+    const [alert, setAlert] = React.useState({
+        is: false, msg: '', body: ''
     })
-    const [list, setList] = React.useState([])
-    const [text, setText] = React.useState(false)
+    const [edit, setEdit] = React.useState(false)
+
+    React.useEffect(() => {
+        localStorage.setItem('list', JSON.stringify(list))
+    }, [list])
 
     function handleDelete(id) {
-        const newList = list.filter((itm) => itm.id !== id)
-        setList(newList);
-        console.log(newList);
+        setList((prevValues) => {
+            return prevValues.filter(
+                (itm, index) => {
+                    return index !== id
+                }
+            )
+        })
+        setAlert({is: true, msg: 'blue', body: 'item removed'})
     }
 
     function handleEdit(id) {
+        setItem(() => {
+            return list.find(
+                (itm, index) => {
+                    return index === id
+                }
+            )}
+        )
+        setEdit(true)
+}
         
-    }
-
-    function handleClick() {
-        setText(true)
-        setTimeout (() => {
-            setText(false)
-        }, 3000)
-        console.log(text);
-    }
 
     function handleSubmit(event) {
         event.preventDefault()
-        setList((prevValues) => {
-            return [
-                ...prevValues,
-                item
-            ]
-        })
+        if(item) {
+            setList(
+                (prevValues) => {
+                    return [
+                        ...prevValues,
+                        item
+                    ]
+                }
+            )
+    
+            setItem('')
+            setAlert({is: true, msg: 'green', body: 'Item Added To The List'})
+            console.log(list);
+            setEdit(false)
+        } else {
+            setItem('')
+            setAlert({is: true, msg: 'red', body: 'Please add item'})
+        }
+
     }
 
     function handleChange(event) {
@@ -53,13 +67,18 @@ export default function App() {
         console.log(item);
     }
 
-    // React.useEffect(() => {
-    //     localStorage.setItem('list', JSON.stringify(list));
-    //   }, [list]);
+    function deleteList() {
+        setList([])
+        setAlert({is: true, msg: 'red', body: 'Empty List'})
+    }
+
+    function removeAlert() {
+        setAlert({is: false, msg: '', body: ''})
+    }
 
   return (
     <div className='main'>
-        {text && <p>Item Added To The List</p>}
+        {alert && <Alert {...alert} removeAlert={removeAlert} />}
         <div className='list'>
             <form onSubmit={handleSubmit} >
                 <h1>Grocery Bud</h1>
@@ -67,28 +86,33 @@ export default function App() {
                     onChange={handleChange}  
                     type='text' 
                     placeholder='e.g. eggs'
-                    value={item.title}
+                    value={item}
                 />
                 <button 
                     className='btn' 
                     type='submit'
-                    onClick={handleClick}
-                >Submit</button>
+                >{!edit ? "Submit" : "Edit"}</button>
             </form>
         </div>
         <div>
-            <GroceryList 
-                groceryList={list}
-                handleEdit={handleEdit}
-                handleDelete={handleDelete} 
-            />
+        {list.length > 0 && 
+        <div>
+            {list.map((itm, index) => {
+                return (
+                    <GroceryList 
+                        key={index}
+                        id={index}
+                        handleEdit={handleEdit}
+                        deleteItem={handleDelete}
+                        item={itm} 
+                    />
+                )
+            })}
+            <button className='delete-all' onClick={deleteList}>Clear Items</button>
+        </div>
+        }
+
         </div>
     </div>
   )
 }
-
-// {list.map((item, index) => {
-//     return (
-//         <p className='item' key={index}>{item}</p>
-//     )
-// })}
